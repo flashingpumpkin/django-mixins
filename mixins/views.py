@@ -22,6 +22,32 @@ class ContextMixin(object):
         context.update(self.get_context())
         return super(ContextMixin, self).render_to_response(context, **response_kwargs)
 
+class ResponseKwargsMixin(object):
+    """
+    Pass static / dynamic response ``**kwargs`` into the response. This could
+    be custom headers or a status code or whatever kwargs your response class
+    takes. Only works with view making usage of 
+    :class:`django.views.generic.base.TemplateResponseMixin`.
+    """
+    response_kwargs = None
+    """
+    Dict of kwargs to pass into the response class when instantiating.
+    """
+    
+    def get_response_kwargs(self):
+        """
+        Returns :attr:`response_kwargs` to extend the response kwargs already
+        received in :meth:`render_to_response`.
+        """
+        assert self.response_kwargs is not None, "No 'response_kwargs' attribute on {0}".format(self)
+        assert isinstance(self.response_kwargs, dict), "'response_kwargs' attribute is not a dict"
+        return self.response_kwargs
+    
+    def render_to_resposne(self, context, **response_kwargs):
+        response_kwargs.update(self.get_response_kwargs())
+        return super(ResponseKwargsMixin, self).render_to_response(context, **response_kwargs)
+    
+
 class PredicateMixin(object):
     """
     A view that calls :meth:`test` with the request object and all parameters
