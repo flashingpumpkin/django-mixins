@@ -1,5 +1,28 @@
+class ContextMixin(object):
+    """ 
+    Extend the template context with a static / dynamic data before sending
+    it to the template response. Only works with views making usage of
+    :class:`django.views.generic.base.TemplateResponseMixin`
+    """
+    context = None
+    """
+    Dict of additional context to be passed into the template.
+    """
+    
+    def get_context(self):
+        """ 
+        Returns :attr:`context` to extend the template context. Override to add
+        context dynamically.
+        """
+        assert self.context is not None, "No 'context' attribute on {0}".format(self)
+        assert isinstance(self.context , dict), "'context' attribute is not a dict"
+        return self.context
+    
+    def render_to_response(self, context, **response_kwargs):
+        context.update(self.get_context())
+        return super(ContextMixin, self).render_to_response(context, **response_kwargs)
 
-class PredicateView(object):
+class PredicateMixin(object):
     """
     A view that calls :meth:`test` with the request object and all parameters
     passed to :meth:`dispatch`. Expects :meth:`test` to return a view class that
@@ -24,7 +47,7 @@ class PredicateView(object):
         view = self.test(request, *args, **kwargs)
         return view(*self.args, **self.kwargs).dispatch(request, *args, **kwargs)
 
-class LoggedInPredicateView(PredicateView):
+class LoggedInPredicateMixin(PredicateMixin):
     """ 
     Mixin that dispatches to different views depending on the user's logged in
     status.
