@@ -48,7 +48,7 @@ class ResponseKwargsMixin(object):
         return super(ResponseKwargsMixin, self).render_to_response(context, **response_kwargs)
     
 
-class PredicateMixin(object):
+class TestMixin(object):
     """
     A view that calls :meth:`test` with the request object and all parameters
     passed to :meth:`dispatch`. Expects :meth:`test` to return a view class that
@@ -73,10 +73,10 @@ class PredicateMixin(object):
         view = self.test(request, *args, **kwargs)
         return view(*self.args, **self.kwargs).dispatch(request, *args, **kwargs)
 
-class LoggedInPredicateMixin(PredicateMixin):
+class LoggedInTestMixin(TestMixin):
     """ 
     Mixin that dispatches to different views depending on the user's logged in
-    status.
+    status **without redirecting the user**.
     """
     logged_in = None
     """ View to dispatch to in case we're logged in. """
