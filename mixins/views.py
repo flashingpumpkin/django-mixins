@@ -43,7 +43,7 @@ class ResponseKwargsMixin(object):
         assert isinstance(self.response_kwargs, dict), "'response_kwargs' attribute is not a dict"
         return self.response_kwargs
     
-    def render_to_resposne(self, context, **response_kwargs):
+    def render_to_response(self, context, **response_kwargs):
         response_kwargs.update(self.get_response_kwargs())
         return super(ResponseKwargsMixin, self).render_to_response(context, **response_kwargs)
     
