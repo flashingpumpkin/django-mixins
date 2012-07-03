@@ -1,3 +1,5 @@
+from django.contrib.auth.decorators import login_required
+from django.utils.decorators import method_decorator
 class ContextMixin(object):
     """ 
     Extend the template context with a static / dynamic data before sending
@@ -94,3 +96,15 @@ class LoggedInTestMixin(TestMixin):
         if request.user.is_authenticated():
             return self.logged_in
         return self.logged_out
+
+
+class LoginRequired(object):
+    """
+    Mixin wrapper around the ``django.contrib.auth.login_required``
+    view decorator.
+    """
+    
+    @method_decorator(login_required)
+    def dispatch(self, request, *args, **kwargs):
+        return super(LoginRequired, self).dispatch(request, *args, **kwargs)
+        
