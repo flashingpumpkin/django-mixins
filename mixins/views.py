@@ -75,14 +75,14 @@ class TestMixin(object):
         view = self.test(request, *args, **kwargs)
         return view(*self.args, **self.kwargs).dispatch(request, *args, **kwargs)
 
-class LoggedInTestMixin(TestMixin):
+class OnlineTestMixin(TestMixin):
     """ 
     Mixin that dispatches to different views depending on the user's logged in
     status **without redirecting the user**.
     """
-    logged_in = None
+    online = None
     """ View to dispatch to in case we're logged in. """
-    logged_out = None
+    offline = None
     """ View to dispatch to in case we're not logged in. """
     
     def test(self, request, *args, **kwargs):
@@ -90,12 +90,12 @@ class LoggedInTestMixin(TestMixin):
         Test if the current user is logged in or not and return either 
         :attr:`logged_in` or :attr:`logged_out` 
         """
-        assert self.logged_in is not None, "No view handling the logged in state on {0}".format(self)
-        assert self.logged_out is not None, "No view handling the logged out state on {0}".format(self)
+        assert self.online is not None, "No view handling the logged in state on {0}".format(self)
+        assert self.offline is not None, "No view handling the logged out state on {0}".format(self)
         
         if request.user.is_authenticated():
-            return self.logged_in
-        return self.logged_out
+            return self.online
+        return self.offline
 
 
 class LoginRequired(object):
