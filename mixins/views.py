@@ -1,5 +1,8 @@
 from django.contrib.auth.decorators import login_required
+from django.http import HttpResponseForbidden
 from django.utils.decorators import method_decorator
+
+
 class ContextMixin(object):
     """ 
     Extend the template context with a static / dynamic data before sending
@@ -70,10 +73,26 @@ class TestMixin(object):
         raise NotImplementedError
     
     def dispatch(self, request, *args, **kwargs):
-        assert hasattr(self, 'test'), "No test method on {0}".format(self)
+        assert hasattr(self, 'test'), "No test method on {}".format(self)
         
         view = self.test(request, *args, **kwargs)
         return view(*self.args, **self.kwargs).dispatch(request, *args, **kwargs)
+    
+class PassesTestMixin(object):
+    """
+    A view that calls :meth:`test` with the request object and all parameters 
+    passwd to :met:`dispatch`. Expects :meth:`test` to return ``True`` or ``False``.
+    Returns :attr:`django.core.http.HttpResponseForbidden` if :meth:`test` returned
+    ``False``.
+    """
+    def test(self, request, *args, **kwargs):
+        raise NotImplementedError
+
+    def dispatch(self, request, *args, **kwargs):
+        if not self.test(request, *args, **kwargs):
+            return HttpResponseForbidden()
+        return super(PassesTestMixin, self).dispatch(request, *args, **kwargs)
+
 
 class OnlineTestMixin(TestMixin):
     """ 
@@ -107,4 +126,14 @@ class LoginRequired(object):
     @method_decorator(login_required)
     def dispatch(self, request, *args, **kwargs):
         return super(LoginRequired, self).dispatch(request, *args, **kwargs)
-        
+
+
+class StaffLoginRequired(PassesTestMixin):
+    """
+    Mixin to only allow staff to access a view.
+    """
+    def test(self, request, *args, **kwargs):
+        return request.user.is_authenticated() and (request.user.is_staff or 
+            request.user.is_superuser)
+
+
