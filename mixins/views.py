@@ -1,7 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseForbidden
 from django.utils.decorators import method_decorator
-
+from django.views.generic import TemplateView
 
 class ContextMixin(object):
     """ 
@@ -137,3 +137,11 @@ class StaffLoginRequired(PassesTestMixin):
             request.user.is_superuser)
 
 
+class DirectToTemplateView(TemplateView):
+    template_context = {}
+
+    def get_template_context(self):
+        return self.template_context
+
+    def get(self, request, *args, **kwargs):
+        return self.render_to_response(self.get_template_context())
